@@ -1,0 +1,10 @@
+@ECHO OFF
+cd c:\vagrant
+set repo_id=REPO_IP
+set repo_port=REPO_PORT
+
+cd $DDS_ROOT\DevGuideExamples\DCPS\Messenger.minimal
+cp c:\vagrant\scripts\sub.ini sub.ini
+
+powershell.exe -noexit c:\vagrant\scripts\test.ps1:
+subscriber -ORBDottedDecimalAddresses 1 -DCPSDebugLevel 10 -ORBLogFile .\scripts\sub.log  -DCPSConfigFile sub.ini > .\scripts\received_message.txt
