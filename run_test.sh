@@ -73,7 +73,7 @@ case "$1" in
 esac
 
 repo_port=$1
-[ "$repo_port" ] ||  repo_port=10000 
+[ "$repo_port" ] ||  repo_port=20000
 host_port=$2
 [ "$host_port" ] ||  host_port=1234 
 
@@ -92,7 +92,7 @@ if [ $? -ne 0 ]; then
     vagrant box add --name /home/yfu/projects/vagrant/opendds-crossplatform/dds.box
     exit 1
 fi
-# vagrant up 
+vagrant up 
 
 
 # # collect ip of virtualbox
