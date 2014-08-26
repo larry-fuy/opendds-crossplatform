@@ -1,11 +1,11 @@
 #!/bin/sh
+set -e
 # 1) Check the version of
 #      Docker : 1.1.2
 #      Vagrant : 1.6.3
 #      VBox : 4.3.14
 #      Kernel : 3.15.10
 # 2) Run VBox for repo
-
 docker_ver=1.1.2
 vagrant_ver=1.6.3
 vbox_ver=4.3.14
@@ -64,13 +64,23 @@ if [ $forward -eq 0 ]; then
     sudo 'echo 1 > /proc/sys/net/ipv4/ip_forward' 
 fi
 
+case "$1" in
+    -h)
+	echo "Syntax:"
+	echo "run_test [repo_port] [host_port]"
+	exit 1
+      ;;
+esac
+
+repo_port=$1
+[ "$repo_port" ] ||  repo_port=10000 
+host_port=$2
+[ "$host_port" ] ||  host_port=1234 
+
 # start vagrant box for inforepo
 echo "run inforepo..."
-repo_port=10000
-host_port=1234
-vm_name=repo_vm
-
 # edit Vagrantfile to replace the ip address
+vm_name=repo_vm
 sed -e "s/repo_port/$repo_port/g" \
 -e "s/vm_name/$vm_name/g" \
  Vagrant_template > Vagrantfile
