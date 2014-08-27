@@ -73,7 +73,7 @@ case "$1" in
 esac
 
 repo_port=$1
-[ "$repo_port" ] ||  repo_port=20000
+[ "$repo_port" ] ||  repo_port=15000
 host_port=$2
 [ "$host_port" ] ||  host_port=1234 
 
@@ -85,6 +85,11 @@ sed -e "s/repo_port/$repo_port/g" \
 -e "s/vm_name/$vm_name/g" \
  Vagrant_template > Vagrantfile
 
+ip addr show vboxnet0 | grep vboxnet0
+if [ $? -ne 0 ]; then
+    vboxmanage hostonlyif create
+fi
+
 vagrant box list | grep '^dds'
 if [ $? -ne 0 ]; then 
     # Todo : import the box automatically
@@ -92,42 +97,52 @@ if [ $? -ne 0 ]; then
     vagrant box add --name /home/yfu/projects/vagrant/opendds-crossplatform/dds.box
     exit 1
 fi
-vagrant up 
+vagrant up --no-provision
 
 
-# # collect ip of virtualbox
+# collect ip of host-only network interface in virtualbox
+echo "reset network..."
+vnet=$(vboxmanage showvminfo repo_vm | grep "NIC.*Host-only" | gawk '{print $8}' | sed -e "s/'//g" -e "s/,//g")
+repo_gateway=$(ip addr show $vnet | grep -w inet | gawk '{print $2}' | sed 's/\/24//')
+repo_ip=$(echo $repo_gateway | gawk -F. '{print $1"."$2"."$3"."$4+1}')
+sed -e "s/repo_port/$repo_port/g" \
+-e "s/repo_ip/$repo_ip/g" \
+-e "s/repo_gateway/$repo_gateway/g" \
+ ./scripts/run_dds_win_template.bat > ./scripts/run_dds_win.bat
+vagrant provision &
+#debug : rdesktop -u vagrant 127.0.0.1:3389 &
 
-# repo_ip=$(vboxmanage guestproperty enumerate $repo_vm | grep Net | head -n1 | gawk '{print $4}' | sed s/,//g)
+echo "wait a moment for inforepo starting..."
+sleep 30
 
-# ip add show vboxnet0 | grep vboxnet0
-# if [ $? -ne 0 ]; then
-#     vboxmanage hostonlyif create
-# fi
-# repo_gateway=$(ip addr show vboxnet0 | grep -w inet | gawk '{print $2}' | sed 's/\/24//')
+echo "clearing containers..."
+echo "run here..."
+docker ps | grep pub
+if [ $? -eq 0 ]; then
+    docker stop pub
+    docker rm  -f pub 
+fi
+echo "run there..."
+docker ps | grep sub
+if [ $? -eq 0 ]; then
+    docker stop sub
+    docker rm  -f sub
+fi
 
-# sed -e 's/repo_port/$repo_port/g' \
-# -e 's/repo_ip/$repo_ip/g' \
-# -e 's/repo_gateway/$repo_gateway/g' \
-#  ./scripts/run_dds_win_template.bat > ./scripts/run_dds_win.bat
-# vagrant provision
+echo "run publisher..."
+docker run \
+-d --name pub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
+--env "repo_ip=$repo_ip"  --env "host_port=$host_port" \
+-p $host_port \
+dds_nettools /bin/bash
+#yongfu/opendds 
+#/scripts/publisher.sh
+sleep 5
 
-# #debug : rdesktop -u vagrant 127.0.0.1:3389 &
-# echo "clearing containers..."
-# docker stop  pub sub
-# docker rm   pub sub
-
-# echo "run publisher..."
-# docker run \
-# -d --name pub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
-# -e "repo_ip=$repo_ip"  -e "host_port=$host_port" \
-# -p host_port
-# dds_nettools /bin/bash
-# #yongfu/opendds 
-# #/scripts/publisher.sh
-
-# echo "run subscriber..."
-# # docker run -d --name publisher -e "repo_ip=$repo_ip" -e "repo_port=$repo_port" -e "host_port=$host_port"  -v "$PWD/scripts:/scripts"  -w /scripts yongfu/opendds /scripts/publisher.sh > /dev/null 2>&1
-# sudo docker run \
-# -d --name sub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
-# -e "repo_ip=$repo_ip" -e "host_port=$host_port" \
-# dds_nettools /bin/bash
+echo "run subscriber..."
+# docker run -d --name publisher -e "repo_ip=$repo_ip" -e "repo_port=$repo_port" -e "host_port=$host_port"  -v "$PWD/scripts:/scripts"  -w /scripts yongfu/opendds /scripts/publisher.sh > /dev/null 2>&1
+docker run \
+-d --name sub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
+--env "repo_ip=$repo_ip" --env "host_port=$host_port" \
+-p $host_port \
+dds_nettools /bin/bash
