@@ -1,5 +1,4 @@
 #!/bin/sh
-set -e
 # 1) Check the version of
 #      Docker : 1.1.2
 #      Vagrant : 1.6.3
@@ -85,13 +84,14 @@ sed -e "s/repo_port/$repo_port/g" \
 -e "s/vm_name/$vm_name/g" \
  Vagrant_template > Vagrantfile
 
-ip addr show vboxnet0 | grep vboxnet0
-if [ $? -ne 0 ]; then
+eval "ip addr show vboxnet0 > /dev/null"
+if [[ $? -ne 0 ]]; then
     vboxmanage hostonlyif create
 fi
 
+#eval "has_dds=$(vagrant box list | grep \'^dds\')"
 vagrant box list | grep '^dds'
-if [ $? -ne 0 ]; then 
+if [[ $? -ne 0 ]]; then 
     # Todo : import the box automatically
     echo "Add the dds box first..."
     vagrant box add --name /home/yfu/projects/vagrant/opendds-crossplatform/dds.box
@@ -115,16 +115,15 @@ vagrant provision &
 echo "wait a moment for inforepo starting..."
 sleep 30
 
-echo "clearing containers..."
-echo "run here..."
 docker ps | grep pub
-if [ $? -eq 0 ]; then
+if [[  $? -ne 0 ]]; then
+    echo "delete pub ... "
     docker stop pub
     docker rm  -f pub 
 fi
-echo "run there..."
 docker ps | grep sub
-if [ $? -eq 0 ]; then
+if [[ $? -ne 0 ]]; then
+    echo "delete pub ... "
     docker stop sub
     docker rm  -f sub
 fi
@@ -134,10 +133,11 @@ docker run \
 -d --name pub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
 --env "repo_ip=$repo_ip"  --env "host_port=$host_port" \
 -p $host_port \
-dds_nettools /bin/bash
-#yongfu/opendds 
-#/scripts/publisher.sh
+yongfu/opendds \
+/scripts/publisher.sh
 sleep 5
+#dds_nettools /bin/bash
+#yongfu/opendds 
 
 echo "run subscriber..."
 # docker run -d --name publisher -e "repo_ip=$repo_ip" -e "repo_port=$repo_port" -e "host_port=$host_port"  -v "$PWD/scripts:/scripts"  -w /scripts yongfu/opendds /scripts/publisher.sh > /dev/null 2>&1
@@ -145,4 +145,6 @@ docker run \
 -d --name sub -v "$PWD/scripts:/scripts" -w /scripts --env "repo_port=$repo_port" \
 --env "repo_ip=$repo_ip" --env "host_port=$host_port" \
 -p $host_port \
-dds_nettools /bin/bash
+yongfu/opendds \
+/scripts/subscriber.sh
+#dds_nettools /bin/bash

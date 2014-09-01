@@ -13,6 +13,9 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 #  config.vm.box = "lmayorga1980/windows7-sp1"
   config.vm.box = "dds"
   config.vm.communicator = "winrm"
+  config.vm.provider "virtualbox" do |v|
+    v.name = "repo_vm"
+  end
 
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
@@ -22,13 +25,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
-  config.vm.network "forwarded_port", guest: 10000, host: 10000
+  config.vm.network "forwarded_port", guest: 15000, host: 15000
   config.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true
 
   # Create a private network, which allows host-only access to the machine
   # using a specific IP.
-  config.vm.network "private_network", ip: "172.19.0.2"
-
+  # config.vm.network "private_network", ip: "172.19.0.2"
+  # The specific ip only used as a place holder. Provisioner
+  # will change it later
+  config.vm.network "private_network", ip: "196.128.0.2"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
