@@ -1,0 +1,73 @@
+#!/bin/sh
+# Check pacakges and their version used in this test
+docker_ver=1.1.2
+vagrant_ver=1.6.3
+vbox_ver=4.3.14
+# kernel version is not a strict requirement 
+#kernel_ver=3.15.10
+
+case "$1" in
+    -h)
+	echo "Check the packages and version used in this test."
+	exit 1
+      ;;
+esac
+
+check_version()
+{
+    local version=$1 check=$2
+    if  [[ "$version" = "$check" ]]; then
+	echo 0
+    else 
+	local winner=$(printf "$version\n$check\n" | sort -V | head -1)
+	if [[ "$winner" = "$check" ]]; then 
+	    echo 0
+	else
+	    echo 1
+        fi
+    fi
+}
+
+upgrade=0
+# Docker
+ver=$(docker -v | gawk '{ print $3 }' | sed 's\,\\g')
+echo "check Docker...: $ver"
+return_ver=$(check_version $ver $docker_ver)
+if [[ $return_ver -ne 0 ]]; then
+  echo "Docker Version $ver must be greater than $docker_ver"
+  upgrade=1
+fi
+
+# Vagrant
+ver=$(vagrant -v | gawk '{ print $2 }')
+echo "check Vagrant...: $ver"
+return_ver=$(check_version $ver $vagrant_ver)
+if [[ $return_ver -ne 0 ]]; then
+  echo "Vagrant Version $ver must be greater than $vagrant_ver"
+  upgrade=1
+fi
+
+# VirtualBox
+ver=$(vboxmanage -v | gawk -F "_" '{print $1}')
+echo "check VirtualBox...: $ver"
+return_ver=$(check_version $ver $vbox_ver)
+if [[ $return_ver -ne 0 ]]; then
+  echo "Vagrant Version $ver must be greater than $vbox_ver"
+  upgrade=1
+fi
+
+# Git
+ver=$(git --version | gawk '{print $3}')
+if [[ $? -ne 0 ]]; then
+  echo "Cannot find Git"
+  upgrade=1
+fi
+echo "check Git...: $ver"
+
+
+#
+if [ $upgrade -eq 1 ]; then
+    echo "Please upgrade/install the required package first..."
+    exit
+fi
+echo "Seems you have all packages prepared!"
