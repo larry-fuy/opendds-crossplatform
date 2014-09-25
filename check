@@ -68,6 +68,7 @@ echo "check Git...: $ver"
 #
 if [ $upgrade -eq 1 ]; then
     echo "Please upgrade/install the required package first..."
-    exit
+    exit 1
 fi
-echo "Seems you have all packages prepared!"
+echo "you have all packages prepared!"
+exit 0
