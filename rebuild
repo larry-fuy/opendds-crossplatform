@@ -1,23 +1,43 @@
 #!/bin/sh
 # force rebuild
 
-case "$1" in
-    -h)
-	echo "Force rebuild Docker image and Vagrant box"
-	exit 0
-      ;;
-esac
+rebuild_v=0
+rebuild_d=0
+OPTIONS=$(getopt -o h -- "$@")
+eval set -- "$OPTIONS"
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+     	  -h)
+	        echo "Usage: rebuild [OPTIONS] [vagrant | docker]"
+		echo "Force rebuild Docker image and Vagrant box";
+		echo "Options: ";
+		echo "    -h   Show this message"
+		break ;;
+    	vagrant)
+		rebuild_v=1; shift ;;
+    	docker)
+		rebuild_d=1; shift ;;
+	--) shift ;;
+	*) echo "Internal error!" ; exit 1 ;;
+    esac
+done
  
 # rebuild Vagrant box 
-echo "rebuild OpenDDS Vagrant box..."
-git clone https://github.com/larry-fuy/vagrant-opendds
-cd vagrant-opendds && build.sh
+if [ $rebuild_v -eq 1 ]; then
+   echo "rebuild OpenDDS Vagrant box..."
+#   git clone https://github.com/larry-fuy/vagrant-opendds
+#   cd vagrant-opendds && build.sh
 cd ..
+fi
 
 # rebuild Docker image
-echo "rebuild OpenDDS Docker image..."
-git clone https://github.com/larry-fuy/docker-opendds
-cd docker-opendds && build.sh
+if [ $rebuild_d -eq 1 ]; then
+   echo "rebuild OpenDDS Docker image..."
+#   git clone https://github.com/larry-fuy/docker-opendds
+#   cd docker-opendds && build.sh
 cd ..
+fi
 
 exit

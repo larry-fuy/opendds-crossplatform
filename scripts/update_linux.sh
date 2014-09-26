@@ -1,14 +1,15 @@
 #!/bin/sh
 # Update OpenDDS
-# Readme : http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/DDS/docs/INSTALL
-cd /opt
-if [ -d trunk ]; then
-    cd trunk && svn up
+if [ -d /opt/trunk ]; then
+    cd /opt/trunk && svn up
 else 
+    # no source code (in some cases) then dowload 
+    # http://www.dre.vanderbilt.edu/~schmidt/DOC_ROOT/DDS/docs/INSTALL
+   cd /opt
    svn co svn://svn.dre.vanderbilt.edu/DOC/DDS/trunk
 fi
 # run script to automatically download the TAO/ACE and compile
-cd trunk 
+cd /opt/trunk 
 ./configure
 make
 chmod +x ./setenv.sh && ./setenv.sh

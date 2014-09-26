@@ -1,7 +1,7 @@
 #!/bin/sh
 
-# clean docker containers
-# stop and clean 
+names=(pub sub)
+# stop docker containers
 echo "stop and clean docker containers..."
 docker stop ${names[*]} > /dev/null 2>&1
 docker rm ${names[*]} > /dev/null 2>&1

@@ -70,5 +70,5 @@ if [ $upgrade -eq 1 ]; then
     echo "Please upgrade/install the required package first..."
     exit 1
 fi
-echo "you have all packages prepared!"
+echo "all packages prepared"
 exit 0
