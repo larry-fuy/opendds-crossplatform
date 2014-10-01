@@ -13,6 +13,7 @@ while [ -d  /proc/$pid ]; do
     sleep 1
 done
 
+docker rmi opendds_update
 docker commit update opendds_update
 docker rm update
 

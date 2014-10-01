@@ -15,6 +15,8 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.provider "virtualbox" do |v|
     v.name = "repo_vm"
   end
+  config.vm.define :repo_vm do |t|
+  end
 
   config.vm.network "forwarded_port", guest: 15000, host: 15000
   config.vm.network :forwarded_port, guest: 3389, host: 3389, id: "rdp", auto_correct: true

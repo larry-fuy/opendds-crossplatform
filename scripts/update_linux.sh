@@ -1,5 +1,8 @@
 #!/bin/sh
 # Update OpenDDS
+touch build_dds_linux.log
+exec 1>build_dds_linux.log
+
 if [ -d /opt/trunk ]; then
     cd /opt/trunk && svn up
 else 
