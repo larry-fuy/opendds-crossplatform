@@ -27,16 +27,22 @@ done
 # rebuild Vagrant box 
 if [ $rebuild_v -eq 1 ]; then
    echo "rebuild OpenDDS Vagrant box..."
+   if [ -d vagrant-opendds ] ; then
+      rm -rf vagrant-opendds
+   fi
    git clone https://github.com/larry-fuy/vagrant-opendds
-   cd vagrant-opendds && build.sh
+   cd vagrant-opendds && ./build.sh
 cd ..
 fi
 
 # rebuild Docker image
 if [ $rebuild_d -eq 1 ]; then
    echo "rebuild OpenDDS Docker image..."
+   if [ -d docker-opendds ] ; then
+      rm -rf docker-opendds
+   fi
    git clone https://github.com/larry-fuy/docker-opendds
-   cd docker-opendds && build.sh
+   cd docker-opendds && ./build.sh
 cd ..
 fi
 
