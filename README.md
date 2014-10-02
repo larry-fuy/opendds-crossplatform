@@ -7,7 +7,6 @@ This framework tests OpenDDS cross-platform (Linux &
 Windows).  Docker is used to create the container for Linux while
 Vagrant is used to create windows virtual machine.
 
-
 1. Required software
     * [Docker]() (>1.1.2)
     * [Vagrant] (>1.6.3)
@@ -23,4 +22,4 @@ Vagrant is used to create windows virtual machine.
 
 5. Run tests
 
-
+More details see http://yfu.svbtle.com/cross-platform-tests-for-opendds
