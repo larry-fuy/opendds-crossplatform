@@ -37,7 +37,14 @@ do
 done
 
 # check package and their version
-./check
+[ ./check ] || exit 1
+
+# rebuild Docker image if not found
+rebuild_d=$(docker images | grep docker_opendds)
+if [ -z "$rebuild_d" ]; then
+    echo "No existed  Docker image..."
+    ./rebuild docker
+fi
 
 # rebuild Vagrant box if not found
 rebuild_v=$(vagrant box list | grep '^dds')
@@ -46,12 +53,6 @@ if [ -z "$rebuild_v" ] ; then
     ./rebuild vagrant
 fi
 
-# rebuild Docker image if not found
-rebuild_d=$(docker images | grep docker_opendds)
-if [ -z "$rebuild_d" ]; then
-    echo "No existed  Docker image..."
-    ./rebuild docker
-fi
 
 # Let linux kernel forward the packet
 echo "turn on Linux kernel forwarding packets..."

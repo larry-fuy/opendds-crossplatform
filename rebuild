@@ -45,5 +45,3 @@ if [ $rebuild_d -eq 1 ]; then
    cd docker-opendds && ./build.sh
 cd ..
 fi
-
-exit
