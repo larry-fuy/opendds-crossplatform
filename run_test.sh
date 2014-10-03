@@ -37,7 +37,7 @@ do
 done
 
 # check package and their version
-[ ./check ] || exit 1
+./check 
 
 # rebuild Docker image if not found
 rebuild_d=$(docker images | grep docker_opendds)
